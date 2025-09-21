@@ -1,0 +1,40 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fun-language-package"           # distribution name (can have '-')
+version = "0.1.0"
+description = "Fun language exercise"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Din Carmon" }]
+
+# runtime deps
+dependencies = [
+]
+
+# Tell setuptools to look for packages under src/
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# pytest config
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-ra"
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+    "ruff>=0.13.1",
+]
