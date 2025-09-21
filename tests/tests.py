@@ -12,6 +12,7 @@ def test_nested_tuple_for_program():
 def test_invalid_type_for_program():
     try:
         fun_utils.evaluate(["+", 2, 3])
+        assert False, "Expected TypeError"
     except Exception as e:
         assert isinstance(e, TypeError)
         assert str(e) == "Invalid program type: <class 'list'>. Instance: ['+', 2, 3]"
@@ -19,6 +20,7 @@ def test_invalid_type_for_program():
 def test_invalid_tuple_size_for_program():
     try:
         fun_utils.evaluate(("+", 1))
+        assert False, "Expected TypeError"
     except Exception as e:
         assert isinstance(e, TypeError)
         assert str(e) == "Invalid program: ('+', 1)"
@@ -33,6 +35,7 @@ def test_invalid_operator_for_program():
 def test_invalid_nested_tuple_for_program():
     try:
         fun_utils.evaluate(("+", 1, ("x", 2, 3)))
+        assert False, "Expected TypeError"
     except Exception as e:
         assert isinstance(e, TypeError)
         assert str(e) == "Invalid operator: x"

@@ -1,6 +1,6 @@
 
 
-def evaluate(program: tuple | int):
+def evaluate(program: tuple | int) -> int:
     if isinstance(program, tuple):
         if len(program) != 3:
             raise TypeError(f"Invalid program: {program}")
