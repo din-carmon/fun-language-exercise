@@ -1,5 +1,3 @@
-
-
 def evaluate(program: tuple | int) -> int:
     if isinstance(program, tuple):
         if len(program) != 3:
