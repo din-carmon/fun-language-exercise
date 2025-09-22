@@ -31,6 +31,15 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
 warn_unused_ignores = true
+# (Optional extras)
+no_implicit_optional = true
+warn_return_any = true
+strict = true
+
+[tool.ruff]
+lint.select = ["F", "E", "W", "UP", "B", "C90", "N", "PL", "SIM"]  # include pyflakes rules
+lint.ignore = ["PLR2004"] # Ignore magic values in code
+line-length = 125  # set your preferred maximum
 
 [dependency-groups]
 dev = [
