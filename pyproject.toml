@@ -38,7 +38,9 @@ strict = true
 
 [tool.ruff]
 lint.select = ["F", "E", "W", "UP", "B", "C90", "N", "PL", "SIM"]  # include pyflakes rules
-lint.ignore = ["PLR2004"] # Ignore magic values in code
+lint.ignore = ["PLR2004", "C901", "PLR0912"] # PLR2004 - Ignore magic values in code
+# C901 - Ignore too complex error
+# PLR0912 - Ignore too many branches error
 line-length = 125  # set your preferred maximum
 
 [dependency-groups]

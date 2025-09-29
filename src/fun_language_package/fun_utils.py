@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
-
+from fun_language_package import fun_visitor
 
 class EvalError(Exception):
     """Base class for evaluation-related errors."""
@@ -37,6 +37,10 @@ class FunProgram(ABC):
     def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
         pass
 
+    @abstractmethod
+    def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
+        pass
+
 
 class FunInt(FunProgram):
     def __init__(self, value: int) -> None:
@@ -44,6 +48,9 @@ class FunInt(FunProgram):
 
     def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
         return self
+
+    def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
+        return visitor.visit_fun_int(self)
 
     def __repr__(self) -> str:
         return f"{self.value}"
@@ -66,6 +73,9 @@ class FunPlusOperation(FunProgram):
 
         return FunInt(left.value + right.value)
 
+    def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
+        return visitor.visit_fun_plus_operation(self)
+
     def __repr__(self) -> str:
         return f"({self.left} + {self.right})"
 
@@ -81,6 +91,9 @@ class FunVar(FunProgram):
         # Otherwise, return a FunVar - We should not do anything else to simplify the expression.
         return self
 
+    def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
+        return visitor.visit_fun_var(self)
+
     def __repr__(self) -> str:
         return f"{self.var_name}"
 
@@ -93,33 +106,34 @@ class FunFunction(FunProgram):
     def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
         return self
 
+    def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
+        return visitor.visit_fun_function(self)
+
     def __repr__(self) -> str:
         return f"({self.fun_var}->{self.fun_expression})"
 
 
 class FunFunctionCall(FunProgram):
-    def __init__(self, function_expression: FunProgram, fun_argument: FunProgram) -> None:
+    def __init__(self, function_expression: FunFunction, fun_argument: FunProgram) -> None:
         self.function_expression = function_expression
         self.fun_argument = fun_argument
 
     def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        # 1. Evaluate the function expression. Make sure it is a function.
-        function = self.function_expression.evaluate(assignments)
-        if not isinstance(function, FunFunction):  # First, evaluate to a function
-            raise FunctionEvaluationError(self.function_expression)
-
-        # 2. Evaluate the argument.
+        # 1. Evaluate the argument.
         argument = self.fun_argument.evaluate(assignments)
         if not isinstance(argument, FunInt):
             raise TypeError(f"Invalid argument type: {type(argument)}. Instance: {argument}")
 
-        # 3. Substitute the argument into the function expression, using updated assignments, and reevaluation.
+        # 2. Substitute the argument into the function expression, using updated assignments, and reevaluation.
         if assignments is None:
             assignments = {}
         updated_assignments = assignments.copy()
-        updated_assignments[function.fun_var.var_name] = argument
+        updated_assignments[self.function_expression.fun_var.var_name] = argument
 
-        return function.fun_expression.evaluate(updated_assignments)
+        return self.function_expression.fun_expression.evaluate(updated_assignments)
+
+    def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
+        return visitor.visit_fun_function_call(self)
 
     def __repr__(self) -> str:
         return f"({self.fun_argument} : {self.function_expression})"
@@ -154,6 +168,8 @@ def build_fun_program(program: tuple[Any, ...] | int | str) -> FunProgram:
             fun_program_1 = build_fun_program(program[0])
             fun_program_2 = build_fun_program(program[1])
 
+            if not isinstance(fun_program_1, FunFunction):
+                raise TypeError(f"Invalid function call. First argument must be a function: {fun_program_1}")
             return FunFunctionCall(fun_program_1, fun_program_2)
         else:
             raise TypeError(f"Invalid program: {program}")
