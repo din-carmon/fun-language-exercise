@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 from fun_language_package import fun_visitor
+from fun_language_package import evaluation_visitor
+
 
 class EvalError(Exception):
     """Base class for evaluation-related errors."""
@@ -33,9 +35,6 @@ class EvaluationIsNotIntError(EvalError):
 
 
 class FunProgram(ABC):
-    @abstractmethod
-    def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        pass
 
     @abstractmethod
     def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
@@ -45,9 +44,6 @@ class FunProgram(ABC):
 class FunInt(FunProgram):
     def __init__(self, value: int) -> None:
         self.value = value
-
-    def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        return self
 
     def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
         return visitor.visit_fun_int(self)
@@ -61,18 +57,6 @@ class FunPlusOperation(FunProgram):
         self.left = left
         self.right = right
 
-    def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        left = self.left.evaluate(assignments)
-        right = self.right.evaluate(assignments)
-
-        if not isinstance(left, FunInt):
-            raise EvaluationIsNotIntError(left)
-
-        if not isinstance(right, FunInt):
-            raise EvaluationIsNotIntError(right)
-
-        return FunInt(left.value + right.value)
-
     def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
         return visitor.visit_fun_plus_operation(self)
 
@@ -83,13 +67,6 @@ class FunPlusOperation(FunProgram):
 class FunVar(FunProgram):
     def __init__(self, var_name: str) -> None:
         self.var_name = var_name
-
-    def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        if assignments is not None and self.var_name in assignments:
-            return assignments[self.var_name]
-
-        # Otherwise, return a FunVar - We should not do anything else to simplify the expression.
-        return self
 
     def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
         return visitor.visit_fun_var(self)
@@ -103,9 +80,6 @@ class FunFunction(FunProgram):
         self.fun_var = fun_var
         self.fun_expression = fun_expression
 
-    def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        return self
-
     def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
         return visitor.visit_fun_function(self)
 
@@ -117,20 +91,6 @@ class FunFunctionCall(FunProgram):
     def __init__(self, function_expression: FunFunction, fun_argument: FunProgram) -> None:
         self.function_expression = function_expression
         self.fun_argument = fun_argument
-
-    def evaluate(self, assignments: dict[str, FunProgram] | None = None) -> FunProgram:
-        # 1. Evaluate the argument.
-        argument = self.fun_argument.evaluate(assignments)
-        if not isinstance(argument, FunInt):
-            raise TypeError(f"Invalid argument type: {type(argument)}. Instance: {argument}")
-
-        # 2. Substitute the argument into the function expression, using updated assignments, and reevaluation.
-        if assignments is None:
-            assignments = {}
-        updated_assignments = assignments.copy()
-        updated_assignments[self.function_expression.fun_var.var_name] = argument
-
-        return self.function_expression.fun_expression.evaluate(updated_assignments)
 
     def accept(self, visitor: fun_visitor.FunVisitor) -> Any:
         return visitor.visit_fun_function_call(self)
@@ -178,9 +138,5 @@ def build_fun_program(program: tuple[Any, ...] | int | str) -> FunProgram:
 
 
 def evaluate(program: tuple[Any, ...] | int) -> int:
-    fun_program = build_fun_program(program)
-    evaluation = fun_program.evaluate()
-    if isinstance(evaluation, FunInt):
-        return evaluation.value
-
-    raise EvaluationIsNotIntError(evaluation)
+    visitor = evaluation_visitor.EvaluationVisitor()
+    return visitor.visit(program)

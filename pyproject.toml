@@ -9,7 +9,7 @@ name = "fun-language-package"           # distribution name (can have '-')
 version = "0.1.0"
 description = "Fun language exercise"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [{ name = "Din Carmon" }]
 
 # runtime deps
@@ -38,9 +38,11 @@ strict = true
 
 [tool.ruff]
 lint.select = ["F", "E", "W", "UP", "B", "C90", "N", "PL", "SIM"]  # include pyflakes rules
-lint.ignore = ["PLR2004", "C901", "PLR0912"] # PLR2004 - Ignore magic values in code
-# C901 - Ignore too complex error
-# PLR0912 - Ignore too many branches error
+lint.ignore = [
+    "PLR2004",  # Ignore magic values in code
+    "C901",     # Ignore "too complex" errors
+    "PLR0912",  # Ignore "too many branches" errors
+]
 line-length = 125  # set your preferred maximum
 
 [dependency-groups]

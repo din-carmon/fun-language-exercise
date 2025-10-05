@@ -1,8 +1,6 @@
-from __future__ import annotations  # 3.11+ does this by default
+from __future__ import annotations
 from fun_language_package import fun_visitor, fun_utils
 from typing import Any
-
-from fun_language_package.fun_utils import EvaluationIsNotIntError
 
 
 class EvaluationVisitor(fun_visitor.FunVisitor):
@@ -15,7 +13,7 @@ class EvaluationVisitor(fun_visitor.FunVisitor):
         self.assignments = {}
         evaluated = fun_program.accept(self)
         if not isinstance(evaluated, fun_utils.FunInt):
-            raise EvaluationIsNotIntError(evaluated)
+            raise fun_utils.EvaluationIsNotIntError(evaluated)
 
         return evaluated.value
 
@@ -30,19 +28,14 @@ class EvaluationVisitor(fun_visitor.FunVisitor):
         return fun_var
 
     def visit_fun_plus_operation(self, fun_plus_operation: fun_utils.FunPlusOperation) -> fun_utils.FunInt:
-        tmp_copy_of_current_assignments = self.assignments.copy()
-
         left = fun_plus_operation.left.accept(self)
-        self.assignments = tmp_copy_of_current_assignments.copy()  # Reset assignments
-
         right = fun_plus_operation.right.accept(self)
-        self.assignments = tmp_copy_of_current_assignments.copy()  # Reset assignments
 
         if not isinstance(left, fun_utils.FunInt):
-            raise EvaluationIsNotIntError(left)
+            raise fun_utils.EvaluationIsNotIntError(left)
 
         if not isinstance(right, fun_utils.FunInt):
-            raise EvaluationIsNotIntError(right)
+            raise fun_utils.EvaluationIsNotIntError(right)
 
         return fun_utils.FunInt(left.value + right.value)
 
@@ -50,20 +43,18 @@ class EvaluationVisitor(fun_visitor.FunVisitor):
         return fun_function
 
     def visit_fun_function_call(self, fun_function_call: fun_utils.FunFunctionCall) -> fun_utils.FunInt:
-        tmp_copy_of_current_assignments = self.assignments.copy()
-
         # 1. Evaluate the argument.
         argument = fun_function_call.fun_argument.accept(self)
-        self.assignments = tmp_copy_of_current_assignments.copy() # Reset assignments
         if not isinstance(argument, fun_utils.FunInt):
             raise TypeError(f"Invalid argument type: {type(argument)}. Instance: {argument}")
 
         # 2. Substitute the argument into the function expression, using updated assignments, and reevaluation.
+        tmp_copy_of_current_assignments = self.assignments.copy()
         self.assignments[fun_function_call.function_expression.fun_var.var_name] = argument
         ret = fun_function_call.function_expression.fun_expression.accept(self)
         self.assignments = tmp_copy_of_current_assignments.copy() # Reset assignments
 
         if not isinstance(ret, fun_utils.FunInt):
-            raise EvaluationIsNotIntError(ret)
+            raise fun_utils.EvaluationIsNotIntError(ret)
 
         return ret

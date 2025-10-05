@@ -33,5 +33,8 @@ class UnboundVariableDetectorVisitor(fun_visitor.FunVisitor):
         # 2. Add the new assignment and continue visiting and checking for unbound variables.
         bounded_variables_copy = self.bounded_variables.copy()
         self.bounded_variables.add(fun_function_call.function_expression.fun_var.var_name)
-        fun_function_call.function_expression.accept(self)
-        self.bounded_variables = bounded_variables_copy
+
+        try:
+            fun_function_call.function_expression.accept(self)
+        finally:
+            self.bounded_variables = bounded_variables_copy

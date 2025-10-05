@@ -129,3 +129,10 @@ def test_same_var_nested_function() -> None:
     eval_1 = (add_2, 4)
     prog = (eval_1, 5)
     assert evaluate(prog) == 5
+
+def test_invalid_function_in_function_program() -> None:
+    add_1 = ("fun", "x", ("+", "x", 1))
+    add_2 = ("fun", "x", add_1)
+    prog = (add_2, 4)
+    with pytest.raises(fun_utils.EvaluationIsNotIntError):
+        evaluate(prog)

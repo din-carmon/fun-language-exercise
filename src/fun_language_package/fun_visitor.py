@@ -1,4 +1,4 @@
-from __future__ import annotations  # 3.11+ does this by default
+from __future__ import annotations
 from fun_language_package import fun_utils
 from typing import Any
 
