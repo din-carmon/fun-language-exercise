@@ -1,6 +1,5 @@
-from fun_language_package import fun_utils
-from fun_language_package.fun_utils import UnboundVariableError
-from fun_language_package import fun_visitor
+from __future__ import annotations
+from fun_language_package import fun_utils, fun_visitor
 from typing import Any
 
 
@@ -19,7 +18,7 @@ class UnboundVariableDetectorVisitor(fun_visitor.FunVisitor):
 
     def visit_fun_var(self, fun_var: fun_utils.FunVar) -> None:
         if fun_var.var_name not in self.bounded_variables:
-            raise UnboundVariableError(fun_var.var_name)
+            raise fun_utils.UnboundVariableError(fun_var.var_name)
 
     def visit_fun_function(self, fun_function: fun_utils.FunFunction) -> None:
         fun_function.fun_expression.accept(self)

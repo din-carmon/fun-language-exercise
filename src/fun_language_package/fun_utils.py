@@ -1,7 +1,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
-from fun_language_package import fun_visitor
+from fun_language_package import fun_visitor, function_argument_is_function_detector_visitor, \
+    function_return_function_detector_visitor, unbound_variable_detector_visitor
 from fun_language_package import evaluation_visitor
 
 
@@ -138,5 +139,11 @@ def build_fun_program(program: tuple[Any, ...] | int | str) -> FunProgram:
 
 
 def evaluate(program: tuple[Any, ...] | int) -> int:
-    visitor = evaluation_visitor.EvaluationVisitor()
-    return visitor.visit(program)
+    fun_visitor = function_argument_is_function_detector_visitor.FunctionArgumentIsFunctionDetector()
+    fun_visitor.visit(program)
+    fun_visitor = function_return_function_detector_visitor.FunctionReturnFunctionDetectorVisitor()
+    fun_visitor.visit(program)
+    fun_visitor = unbound_variable_detector_visitor.UnboundVariableDetectorVisitor()
+    fun_visitor.visit(program)
+    fun_visitor = evaluation_visitor.EvaluationVisitor()
+    return fun_visitor.visit(program)

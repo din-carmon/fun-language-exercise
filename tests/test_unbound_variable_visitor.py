@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pytest
 from fun_language_package import fun_utils
 from fun_language_package import unbound_variable_detector_visitor

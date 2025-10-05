@@ -9,9 +9,8 @@ class EvaluationVisitor(fun_visitor.FunVisitor):
         self.assignments: dict[str, fun_utils.FunProgram] = {}
 
     def visit(self, program: tuple[Any, ...] | int) -> int:
-        fun_program = fun_utils.build_fun_program(program)
         self.assignments = {}
-        evaluated = fun_program.accept(self)
+        evaluated = super().visit(program)
         if not isinstance(evaluated, fun_utils.FunInt):
             raise fun_utils.EvaluationIsNotIntError(evaluated)
 

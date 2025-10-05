@@ -1,6 +1,6 @@
+from __future__ import annotations
 import pytest
-from fun_language_package import fun_utils
-from fun_language_package import function_argument_is_function_detector_visitor
+from fun_language_package import fun_utils, function_argument_is_function_detector_visitor
 
 
 def test_valid_function_argument() -> None:
